@@ -36,7 +36,12 @@
   (setf (hunchentoot:content-type*) "text/javascript")
   (ps
     (let ((input (@@ document (get-element-by-id "input")))
-          (output (@@ document (get-element-by-id "output"))))
+          (output (@@ document (get-element-by-id "output")))
+          (line (@@ document (create-element "div")))
+          (hidden-line (@@ document (create-element "input")))
+          (submit-form (@@ document (get-element-by-id "submit"))))
+      (setf (@ hidden-line name) "lines[]")
+      (setf (@ hidden-line type) "hidden")
       (setf (@ console log)
             (lambda (l)
               (setf (@ output "innerHTML") (concatenate 'string (@ output "innerHTML") l "<br>"))
@@ -48,19 +53,28 @@
             (unless (= (@ e key-code) 13)
               return)
             (var val)
+            (var tmp)
+            (var hidden-tmp)
             (try (progn
                    (setf val (eval (@ this value)))
                    (setf (@ window $_) val))
               (:catch (error)
                 (setf val (concatenate 'string (@ error constructor name) ": " (@ error message)))))
-            (setf (@ output "innerHTML") (concatenate 'string (@ output "innerHTML") val "<br>"))
+            (setf tmp (@@ line (clone-node t)))
+            (setf (@ tmp text-content) val)
+            (setf hidden-tmp (@@ hidden-line (clone-node t)))
+            (setf (@ hidden-tmp value) (@ this value))
+            (@@ output (append-child tmp))
+            (@@ submit-form (append-child hidden-tmp))
             (setf (@ input value) "")))))))
 
 
 (hunchentoot:define-easy-handler (home :uri "/") ()
   (page "Your JS console"
     (:output :id "output")
-    (:input :id "input")))
+    (:input :id "input")
+    (:form :id "submit" :action "/new" :method "POST"
+           (:input :type "submit" :value "Save"))))
 
 (setf ps:*js-string-delimiter* #\")
 
