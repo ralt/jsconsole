@@ -25,8 +25,8 @@
 ;;     $('a').css('padding', '5px').text('Hello!');
 ;;
 ;; Taken from https://github.com/fitzgen/tryparenscript.com/blob/892a3bfcebe58dfeaa525bbdc67ace7e5e524518/ps-helpers.lisp#L123
-(ps:defmacro+ps @@ (&rest args)
-  `(ps:chain ,@args))
+(defmacro+ps @@ (&rest args)
+  `(chain ,@args))
 
 (hunchentoot:define-easy-handler (style :uri "/style.css") ()
   (setf (hunchentoot:content-type*) "text/css")
@@ -40,7 +40,7 @@
           (line (@@ document (create-element "div")))
           (hidden-line (@@ document (create-element "input")))
           (submit-form (@@ document (get-element-by-id "submit"))))
-      (setf (@ hidden-line name) "lines[]")
+      (setf (@ hidden-line name) "lines")
       (setf (@ hidden-line type) "hidden")
       (setf (@ console log)
             (lambda (l)
@@ -73,9 +73,15 @@
   (page "Your JS console"
     (:output :id "output")
     (:input :id "input")
-    (:form :id "submit" :action "/new" :method "POST"
+    (:form :id "submit" :action "/save" :method "POST"
            (:input :type "submit" :value "Save"))))
+
+(hunchentoot:define-easy-handler (save :uri "/save"
+                                       :default-request-type :post)
+    ((lines :parameter-type 'list))
+  (new-session lines))
 
 (setf ps:*js-string-delimiter* #\")
 
 (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port 4321))
+(postmodern:connect-toplevel "jsconsole" "jsconsole" "password" "localhost")

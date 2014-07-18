@@ -8,6 +8,8 @@
   :depends-on ("hunchentoot"
                "cl-who"
                "parenscript"
-               "cl-css")
+               "cl-css"
+               "postmodern")
   :components ((:file "package")
+               (:file "database")
                (:file "jsconsole")))
