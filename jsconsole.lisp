@@ -69,7 +69,11 @@
   (new-session lines))
 
 (hunchentoot:define-easy-handler (fetch :uri "/f") ()
-  (format nil "~A" (get-lines (hunchentoot:parameter "q"))))
+  (format nil
+          "~A"
+          (loop for pline in (get-lines
+                              (hunchentoot:parameter "q"))
+             collect (getf pline :line))))
 
 (setf ps:*js-string-delimiter* #\")
 

@@ -33,4 +33,4 @@
 
 ;; Gets one session
 (postmodern:defprepared-with-names get-lines (sid)
-  ("SELECT line FROM line WHERE sid = $1" sid) :lists)
+  ("SELECT line FROM line WHERE sid = $1" sid) :plists)
