@@ -15,6 +15,20 @@
        ,@body
        (:script :src "/script.js")))))
 
+(defmacro fetch-page (title json &body body)
+  `(who:with-html-output-to-string (*standard-output* nil :prologue t)
+     (:html
+      (:head
+       (:meta :charset "utf-8")
+       (:title ,title)
+       (:link :rel "stylesheet" :href "/style.css"))
+      (:body
+       ,@body
+       (:script
+        "var base = " (cl-who:str (jsown:to-json ,json)) ";")
+       (:script :src "/script.js")))))
+
+
 (hunchentoot:define-easy-handler (style :uri "/style.css") ()
   (setf (hunchentoot:content-type*) "text/css")
   (cl-css:css '(("body" :margin 0 :padding 0))))
@@ -39,21 +53,25 @@
           (lambda (e)
             (unless (= (@ e key-code) 13)
               return)
-            (var val)
-            (var tmp)
-            (var hidden-tmp)
-            (try (progn
-                   (setf val (eval (@ this value)))
-                   (setf (@ window $_) val))
-              (:catch (error)
-                (setf val (concatenate 'string (@ error constructor name) ": " (@ error message)))))
-            (setf tmp (chain line (clone-node t)))
-            (setf (@ tmp text-content) val)
-            (setf hidden-tmp (chain hidden-line (clone-node t)))
-            (setf (@ hidden-tmp value) (@ this value))
-            (chain output (append-child tmp))
-            (chain submit-form (append-child hidden-tmp))
-            (setf (@ input value) "")))))))
+            (new-line (@ this value)))))
+      (dolist (line base)
+        (new-line line))
+      (defun new-line (newline)
+        (var val)
+        (var tmp)
+        (var hidden-tmp)
+        (try (progn
+               (setf val (eval newline))
+               (setf (@ window $_) val))
+             (:catch (error)
+               (setf val (concatenate 'string (@ error constructor name) ": " (@ error message)))))
+        (setf tmp (chain line (clone-node t)))
+        (setf (@ tmp text-content) val)
+        (setf hidden-tmp (chain hidden-line (clone-node t)))
+        (setf (@ hidden-tmp value) newline)
+        (chain output (append-child tmp))
+        (chain submit-form (append-child hidden-tmp))
+        (setf (@ input value) "")))))
 
 
 (hunchentoot:define-easy-handler (home :uri "/") ()
@@ -66,14 +84,17 @@
 (hunchentoot:define-easy-handler (save :uri "/save"
                                        :default-request-type :post)
     ((lines :parameter-type 'list))
-  (new-session lines))
+  (hunchentoot:redirect (concatenate 'string "/f?q=" (new-session lines))))
 
 (hunchentoot:define-easy-handler (fetch :uri "/f") ()
-  (format nil
-          "~A"
-          (loop for pline in (get-lines
-                              (hunchentoot:parameter "q"))
-             collect (getf pline :line))))
+  (fetch-page
+      "Saved jsconsole"
+      (loop for pline in (get-lines (hunchentoot:parameter "q"))
+           collect (getf pline :line))
+    (:output :id "output")
+    (:input :id "input")
+    (:form :id "submit" :action "/save" :method "POST"
+           (:input :type "submit" :value "Save"))))
 
 (setf ps:*js-string-delimiter* #\")
 

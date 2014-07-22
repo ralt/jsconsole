@@ -32,5 +32,9 @@
   ("INSERT INTO line (sid, line) VALUES($1, $2)" sid line) :none)
 
 ;; Gets one session
-(postmodern:defprepared-with-names get-lines (sid)
-  ("SELECT line FROM line WHERE sid = $1" sid) :plists)
+(postmodern:defprepared-with-names get-lines (slug)
+  ("SELECT l.line
+    FROM line l
+    LEFT JOIN session s
+    ON l.sid = s.id
+    WHERE s.slug = $1" slug) :plists)
