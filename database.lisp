@@ -30,3 +30,7 @@
 
 (postmodern:defprepared-with-names create-line (sid line)
   ("INSERT INTO line (sid, line) VALUES($1, $2)" sid line) :none)
+
+;; Gets one session
+(postmodern:defprepared-with-names get-lines (sid)
+  ("SELECT line FROM line WHERE sid = $1" sid) :lists)

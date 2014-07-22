@@ -15,19 +15,6 @@
        ,@body
        (:script :src "/script.js")))))
 
-;; Quick, helpful shortcut to `chain`, which does chaining of methods and
-;; properties.
-;;
-;;     (@@ ($ "a") (css "padding" "5px") (text "Hello!"))
-;;
-;; becomes
-;;
-;;     $('a').css('padding', '5px').text('Hello!');
-;;
-;; Taken from https://github.com/fitzgen/tryparenscript.com/blob/892a3bfcebe58dfeaa525bbdc67ace7e5e524518/ps-helpers.lisp#L123
-(defmacro+ps @@ (&rest args)
-  `(chain ,@args))
-
 (hunchentoot:define-easy-handler (style :uri "/style.css") ()
   (setf (hunchentoot:content-type*) "text/css")
   (cl-css:css '(("body" :margin 0 :padding 0))))
@@ -35,18 +22,18 @@
 (hunchentoot:define-easy-handler (script :uri "/script.js") ()
   (setf (hunchentoot:content-type*) "text/javascript")
   (ps
-    (let ((input (@@ document (get-element-by-id "input")))
-          (output (@@ document (get-element-by-id "output")))
-          (line (@@ document (create-element "div")))
-          (hidden-line (@@ document (create-element "input")))
-          (submit-form (@@ document (get-element-by-id "submit"))))
+    (let ((input (chain document (get-element-by-id "input")))
+          (output (chain document (get-element-by-id "output")))
+          (line (chain document (create-element "div")))
+          (hidden-line (chain document (create-element "input")))
+          (submit-form (chain document (get-element-by-id "submit"))))
       (setf (@ hidden-line name) "lines")
       (setf (@ hidden-line type) "hidden")
       (setf (@ console log)
             (lambda (l)
               (setf (@ output "innerHTML") (concatenate 'string (@ output "innerHTML") l "<br>"))
               undefined))
-      (@@ input
+      (chain input
          (add-event-listener
           "keyup"
           (lambda (e)
@@ -60,12 +47,12 @@
                    (setf (@ window $_) val))
               (:catch (error)
                 (setf val (concatenate 'string (@ error constructor name) ": " (@ error message)))))
-            (setf tmp (@@ line (clone-node t)))
+            (setf tmp (chain line (clone-node t)))
             (setf (@ tmp text-content) val)
-            (setf hidden-tmp (@@ hidden-line (clone-node t)))
+            (setf hidden-tmp (chain hidden-line (clone-node t)))
             (setf (@ hidden-tmp value) (@ this value))
-            (@@ output (append-child tmp))
-            (@@ submit-form (append-child hidden-tmp))
+            (chain output (append-child tmp))
+            (chain submit-form (append-child hidden-tmp))
             (setf (@ input value) "")))))))
 
 
@@ -80,6 +67,9 @@
                                        :default-request-type :post)
     ((lines :parameter-type 'list))
   (new-session lines))
+
+(hunchentoot:define-easy-handler (fetch :uri "/f") ()
+  (format nil "~A" (get-lines (hunchentoot:parameter "q"))))
 
 (setf ps:*js-string-delimiter* #\")
 
