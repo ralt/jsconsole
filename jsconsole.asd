@@ -9,7 +9,8 @@
                "cl-who"
                "parenscript"
                "cl-css"
-               "postmodern")
+               "postmodern"
+               "jsown")
   :components ((:file "package")
                (:file "jsconsole")
                (:file "database")
