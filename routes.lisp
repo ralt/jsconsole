@@ -1,5 +1,8 @@
 (in-package #:jsconsole)
 
+(defmacro cat (&body body)
+  `(concatenate 'string ,@body))
+
 (hunchentoot:define-easy-handler (home :uri "/") ()
   (page "Your JS console"
     (:output :id "output")
@@ -10,7 +13,7 @@
 (hunchentoot:define-easy-handler (save :uri "/save"
                                        :default-request-type :post)
     ((lines :parameter-type 'list))
-  (hunchentoot:redirect (concatenate 'string "/fetch?q=" (new-session lines))))
+  (hunchentoot:redirect (cat "/fetch?q=" (new-session lines))))
 
 (hunchentoot:define-easy-handler (fetch :uri "/fetch") ()
   (fetch-page
