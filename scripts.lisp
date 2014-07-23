@@ -12,7 +12,7 @@
       (setf (@ hidden-line type) "hidden")
       (setf (@ console log)
             (lambda (l)
-              (setf (@ output "innerHTML") (concatenate 'string (@ output "innerHTML") l "<br>"))
+              (setf (@ output "innerHTML") (cat (@ output "innerHTML") l "<br>"))
               undefined))
       (chain input
          (add-event-listener
@@ -31,7 +31,7 @@
                (setf val (eval newline))
                (setf (@ window $_) val))
              (:catch (error)
-               (setf val (concatenate 'string (@ error constructor name) ": " (@ error message)))))
+               (setf val (cat (@ error constructor name) ": " (@ error message)))))
         (setf tmp (chain line (clone-node t)))
         (setf (@ tmp text-content) val)
         (setf hidden-tmp (chain hidden-line (clone-node t)))
