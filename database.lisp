@@ -14,14 +14,20 @@
 
 ;; Creates a new slug
 (defun new-slug ()
-  (random-password 5))
+  (let ((slug (generate-slug)))
+    (when (get-session slug)
+      (new-slug))
+    slug))
 
-;; http://www.codecodex.com/wiki/Generate_a_random_password_or_random_string#Common_Lisp
-;; To be replaced with something more correct, i.e. that can use caps/lower.
-(defun random-password (length)
-  (with-output-to-string (stream)
-    (let ((*print-base* 36))
-      (loop repeat length do (princ (random 36) stream)))))
+;; Generates a 5-letters slug using random characters
+(defun generate-slug ()
+  (let* ((chars (coerce "abcdefghijklmnopqrstuvwxyzZBCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" 'list))
+         (chars-count (length chars))
+         (iterations 5))
+    (format nil "~{~a~}" (loop for i from 0 to iterations
+                            collect (nth
+                                     (random chars-count)
+                                     chars)))))
 
 ;; Inserts new lines with the session id
 (defun create-lines (sid lines)
@@ -31,10 +37,16 @@
 (postmodern:defprepared-with-names create-line (sid line)
   ("INSERT INTO line (sid, line) VALUES($1, $2)" sid line) :none)
 
-;; Gets one session
+;; Gets all the lines for a single slug
 (postmodern:defprepared-with-names get-lines (slug)
   ("SELECT l.line
     FROM line l
     LEFT JOIN session s
     ON l.sid = s.id
     WHERE s.slug = $1" slug) :plists)
+
+;; Gets one session
+(postmodern:defprepared-with-names get-session (slug)
+  ("SELECT slug
+    FROM session
+    WHERE slug = $1" slug) :single)
