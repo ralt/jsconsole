@@ -11,5 +11,9 @@
                "cl-css"
                "postmodern")
   :components ((:file "package")
+               (:file "jsconsole")
                (:file "database")
-               (:file "jsconsole")))
+               (:file "styles")
+               (:file "scripts")
+               (:file "routes")
+               (:file "runner")))
