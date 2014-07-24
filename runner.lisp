@@ -6,7 +6,8 @@
 
 (unless postmodern:*database*
   (setf postmodern:*database*
-        (postmodern:connect "jsconsole"
-                            "jsconsole"
-                            "password"
-                            "localhost" :pooled-p t))))
+        (postmodern:connect *db-dbname*
+                            *db-user*
+                            *db-password*
+                            *db-host*
+                            :pooled-p t))))
