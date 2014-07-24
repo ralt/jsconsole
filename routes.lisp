@@ -5,7 +5,7 @@
 
 (hunchentoot:define-easy-handler (home :uri "/") ()
   (page "Your JS console"
-    (cl-who:str (form))))
+    (cl-who:str (main-page))))
 
 (hunchentoot:define-easy-handler (save :uri "/save"
                                        :default-request-type :post)
@@ -17,11 +17,18 @@
       "Saved jsconsole"
       (loop for pline in (get-lines (hunchentoot:parameter "q"))
            collect (getf pline :line))
-    (cl-who:str (form))))
+    (cl-who:str (main-page))))
 
-(defun form ()
+(defun main-page ()
   (cl-who:with-html-output-to-string (*standard-output* nil)
-    (:output :id "output")
-    (:input :id "input")
-    (:form :id "submit" :action "/save" :method "POST"
-           (:input :type "submit" :value "Save"))))
+    (:div :class "header"
+      (:div "Console"))
+    (:div :class "content"
+      (:div :class "tools"
+        (:div :class "clear"
+          "&#9003;")
+        (:div :class "submit"
+          (:form :id "submit" :action "/save" :method "POST"
+            (:input :type "submit" :value "Save"))))
+      (:output :id "output")
+      (:input :id "input"))))
