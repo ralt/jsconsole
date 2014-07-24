@@ -3,6 +3,12 @@
 (hunchentoot:define-easy-handler (script :uri "/script.js") ()
   (setf (hunchentoot:content-type*) "text/javascript")
   (ps
+    (defmacro cat (&body body)
+      `(concatenate 'string ,@body))
+
+    (defmacro @@ (&body body)
+      `(chain ,@body))
+
     (let ((input (chain document (get-element-by-id "input")))
           (output (chain document (get-element-by-id "output")))
           (line (chain document (create-element "div")))
@@ -14,28 +20,35 @@
             (lambda (l)
               (setf (@ output "innerHTML") (cat (@ output "innerHTML") l "<br>"))
               undefined))
-      (chain input
-         (add-event-listener
-          "keyup"
-          (lambda (e)
-            (unless (= (@ e key-code) 13)
-              return)
-            (new-line (@ this value)))))
+
+      (@@ input (add-event-listener
+                 "keyup"
+                 (lambda (e)
+                   (unless (= (@ e key-code) 13)
+                     return)
+                   (new-line (@ this value)))))
+
       (dolist (line base)
         (new-line line))
+
       (defun new-line (newline)
         (var val)
         (var tmp)
         (var hidden-tmp)
+
         (try (progn
                (setf val (eval newline))
                (setf (@ window $_) val))
              (:catch (error)
                (setf val (cat (@ error constructor name) ": " (@ error message)))))
-        (setf tmp (chain line (clone-node t)))
+
+        (setf tmp (@@ line (clone-node t)))
         (setf (@ tmp text-content) val)
-        (setf hidden-tmp (chain hidden-line (clone-node t)))
+
+        (setf hidden-tmp (@@ hidden-line (clone-node t)))
         (setf (@ hidden-tmp value) newline)
-        (chain output (append-child tmp))
-        (chain submit-form (append-child hidden-tmp))
+
+        (@@ output (append-child tmp))
+        (@@ submit-form (append-child hidden-tmp))
+
         (setf (@ input value) "")))))
