@@ -4,4 +4,9 @@
 
 (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port 4321))
 
-(postmodern:connect-toplevel "jsconsole" "jsconsole" "password" "localhost")
+(unless postmodern:*database*
+  (setf postmodern:*database*
+        (postmodern:connect "jsconsole"
+                            "jsconsole"
+                            "password"
+                            "localhost" :pooled-p t))))
