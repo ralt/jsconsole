@@ -37,7 +37,9 @@
         (var hidden-tmp)
 
         (try (progn
-               (setf val (eval newline))
+               (var ev)
+               (setf ev eval)
+               (setf val (ev newline))
                (setf (@ window $_) val))
              (:catch (error)
                (setf val (cat (@ error constructor name) ": " (@ error message)))))

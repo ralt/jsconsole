@@ -10,4 +10,4 @@
                             *db-user*
                             *db-password*
                             *db-host*
-                            :pooled-p t))))
+                            :pooled-p t)))

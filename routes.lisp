@@ -22,7 +22,7 @@
 (defun main-page ()
   (cl-who:with-html-output-to-string (*standard-output* nil)
     (:div :class "header"
-      (:div "Console"))
+      (:span "Console"))
     (:div :class "content"
       (:div :class "tools"
         (:div :class "clear"
@@ -31,4 +31,4 @@
           (:form :id "submit" :action "/save" :method "POST"
             (:input :type "submit" :value "Save"))))
       (:output :id "output")
-      (:input :id "input"))))
+      (:input :id "input" :autofocus "autofocus"))))
