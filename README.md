@@ -1,3 +1,5 @@
+Abandoned project: [jsh][0] is way better.
+
 # jsconsole
 
 Run JavaScript as if you were in the console. Then, easily share this console session.
@@ -7,3 +9,6 @@ This is the point of this application. Writing code as if you were in the browse
 # License
 
 MIT License
+
+
+  [0]: https://github.com/Zirak/jsh
